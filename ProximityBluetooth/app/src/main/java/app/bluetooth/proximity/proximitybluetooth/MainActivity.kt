@@ -11,6 +11,7 @@ import android.view.MenuItem
 
 import kotlinx.android.synthetic.main.activity_main.*
 import android.content.Intent
+import android.util.Log
 import java.io.InputStream
 import java.util.*
 
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bluetoothDevice: BluetoothDevice
     private lateinit var bluetoothSocket: BluetoothSocket
     private lateinit var bluetoothInputStream: InputStream
+    private var threadRun = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,18 +47,54 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(enableBluetooth, 0)
         }
 
-        bluetoothDevice = bluetoothAdapter.getRemoteDevice("TEST")
+        val devices = bluetoothAdapter.bondedDevices
+        for (device in devices) {
+            if (device.name == "TEST") {
+                bluetoothDevice = device
+                break
+            }
+        }
     }
 
     private fun openBluetoothConnection() {
-        val uuid = UUID.fromString("00000000-0000-1000-8000-00805F9B34FB")
-        bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
+        val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+        bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(uuid)
         bluetoothSocket.connect()
         bluetoothInputStream = bluetoothSocket.inputStream
     }
 
     private fun listenBluetoothConnection() {
+        // \n as a byte
+        val delimiter: Byte = 10
 
+        // Just choosing 128 as the max length of a line for now
+        var readBuffer = ByteArray(128)
+        var bufferPosition = 0
+
+        threadRun = true
+        Thread({
+            while(true) {
+                // Stop thread
+                if (!threadRun) break
+
+                val bytesAvailable = bluetoothInputStream.available()
+                // Skip if there is nothing to read
+                if (bytesAvailable == 0) continue
+
+                val buffer = ByteArray(bytesAvailable)
+                bluetoothInputStream.read(buffer)
+
+                for (byte in buffer) {
+                    if (byte == delimiter) {
+                        Log.d("Proximity Measurement", readBuffer.copyOf(bufferPosition).contentToString())
+                        bufferPosition = 0
+                        readBuffer = ByteArray(128)
+                    } else {
+                        readBuffer[bufferPosition++] = byte
+                    }
+                }
+            }
+        }).start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
