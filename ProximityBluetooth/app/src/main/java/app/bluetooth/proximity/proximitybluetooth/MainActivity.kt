@@ -70,36 +70,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun listenBluetoothConnection() {
-        // \n as a byte
-        val delimiter: Byte = 10
-
-        // Just choosing 128 as the max length of a line for now
-        var readBuffer = ByteArray(128)
-        var bufferPosition = 0
-
+        val reader = bluetoothInputStream.bufferedReader()
         threadRun = true
         Thread({
-            while(true) {
-                // Stop thread
-                if (!threadRun) break
-
-                val bytesAvailable = bluetoothInputStream.available()
-                // Skip if there is nothing to read
-                if (bytesAvailable == 0) continue
-
-                val buffer = ByteArray(bytesAvailable)
-                bluetoothInputStream.read(buffer)
-
-                for (byte in buffer) {
-                    if (byte == delimiter) {
-                        Log.d("Proximity Measurement", readBuffer.copyOf(bufferPosition).contentToString())
-                        bufferPosition = 0
-                        readBuffer = ByteArray(128)
-                    } else {
-                        Log.d("BYTE", byte.toString())
-                        readBuffer[bufferPosition++] = byte
-                    }
-                }
+            while (threadRun) {
+                val line = reader.readLine()
+                Log.d("Proximity Measurement", line)
             }
         }).start()
     }
