@@ -34,9 +34,14 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        findBluetoothDevice()
-        openBluetoothConnection()
-        listenBluetoothConnection()
+        try {
+            findBluetoothDevice()
+            openBluetoothConnection()
+            listenBluetoothConnection()
+        } catch (e: Exception) {
+            Log.e("ERROR", e.message)
+            e.printStackTrace()
+        }
     }
 
     private fun findBluetoothDevice() {
@@ -47,10 +52,11 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(enableBluetooth, 0)
         }
 
+        // TODO: don't hardcode the device name
         val devices = bluetoothAdapter.bondedDevices
         for (device in devices) {
             if (device.name == "TEST") {
-                bluetoothDevice = device
+                bluetoothDevice = bluetoothAdapter.getRemoteDevice(device.address)
                 break
             }
         }
@@ -90,6 +96,7 @@ class MainActivity : AppCompatActivity() {
                         bufferPosition = 0
                         readBuffer = ByteArray(128)
                     } else {
+                        Log.d("BYTE", byte.toString())
                         readBuffer[bufferPosition++] = byte
                     }
                 }
