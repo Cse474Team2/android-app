@@ -14,6 +14,10 @@ import android.content.Intent
 import android.util.Log
 import java.io.InputStream
 import java.util.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.graphics.Color
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +37,21 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+
+        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val id = "pre_bump_channel"
+        val name = "Pre-Bump Notification"
+        val description = "You're about to bump into something!"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val mChannel = NotificationChannel(id, name, importance)
+
+        // Configure the notification channel.
+        mChannel.description = description
+        mChannel.enableLights(true)
+        mChannel.lightColor = Color.RED
+        mChannel.enableVibration(true)
+        mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+        mNotificationManager.createNotificationChannel(mChannel)
 
         try {
             findBluetoothDevice()
