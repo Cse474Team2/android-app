@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -14,10 +13,13 @@ import android.content.Intent
 import android.util.Log
 import java.io.InputStream
 import java.util.*
+/*
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+*/
 import android.graphics.Color
+import kotlinx.android.synthetic.main.content_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,11 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
-
+        /*
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val id = "pre_bump_channel"
         val name = "Pre-Bump Notification"
@@ -52,6 +50,13 @@ class MainActivity : AppCompatActivity() {
         mChannel.enableVibration(true)
         mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
         mNotificationManager.createNotificationChannel(mChannel)
+        */
+        textView.text = "I'm ready to start recording data!"
+        textView.setTextSize(48.0F)
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         try {
             findBluetoothDevice()
@@ -95,6 +100,14 @@ class MainActivity : AppCompatActivity() {
             while (threadRun) {
                 val line = reader.readLine()
                 Log.d("Proximity Measurement", line)
+                runOnUiThread({
+                    if (line.toFloat() > 300) {
+                        textView.setTextColor(Color.BLUE)
+                    } else {
+                        textView.setTextColor(Color.RED)
+                    }
+                    textView.text = line
+                })
             }
         }).start()
     }
