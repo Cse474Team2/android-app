@@ -13,13 +13,15 @@ import android.content.Intent
 import android.util.Log
 import java.io.InputStream
 import java.util.*
-/*
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-*/
 import android.graphics.Color
 import kotlinx.android.synthetic.main.content_main.*
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
+import android.provider.Settings
+import android.support.v4.app.NotificationCompat
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,7 +37,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        /*
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val id = "pre_bump_channel"
         val name = "Pre-Bump Notification"
@@ -50,7 +51,36 @@ class MainActivity : AppCompatActivity() {
         mChannel.enableVibration(true)
         mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
         mNotificationManager.createNotificationChannel(mChannel)
-        */
+
+        // The id of the channel.
+        val CHANNEL_ID = "my_channel_01"
+        val mBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.new_mail)
+                .setContentTitle("My notification")
+                .setContentText("Hello World!")
+        // Creates an explicit intent for an Activity in your app
+        val resultIntent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your app to the Home screen.
+        val stackBuilder = TaskStackBuilder.create(this)
+        //  Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent)
+        val resultPendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        mBuilder.setContentIntent(resultPendingIntent)
+
+        // mNotificationId is a unique integer your app uses to identify the
+        // notification. For example, to cancel the notification, you can pass its ID
+        // number to NotificationManager.cancel().
+        mNotificationManager.notify(99, mBuilder.build())
+
         textView.text = "I'm ready to start recording data!"
         textView.setTextSize(48.0F)
     }
