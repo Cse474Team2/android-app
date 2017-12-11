@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
             openBluetoothConnection()
             listenBluetoothConnection()
             reconnect.text = "Connected"
+            reconnect.isEnabled = false
         } catch (e: Exception) {
             Log.e("ERROR", e.message)
             e.printStackTrace()
