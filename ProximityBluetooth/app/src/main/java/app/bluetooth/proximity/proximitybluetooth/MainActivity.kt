@@ -17,6 +17,8 @@ import java.util.*
 import android.content.Context
 import android.graphics.Color
 import kotlinx.android.synthetic.main.content_main.*
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mNotificationManager: NotificationManager
     private var threadRun = false
 
-    private var CHANNEL_ID = "pre_bump_channel"
+    private val CHANNEL_ID = "pre_bump_channel"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,9 +48,12 @@ class MainActivity : AppCompatActivity() {
         mChannel.enableLights(true)
         mChannel.lightColor = Color.RED
         mChannel.enableVibration(true)
-        mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+        mChannel.vibrationPattern = longArrayOf(200)
         mNotificationManager.createNotificationChannel(mChannel)
 
+        textView.text = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC).toString()
+        mNotificationManager.notify(1001, getNotification("Bump", "Welcome to the bump app!").build())
+        textView.setTextSize(48.0F)
         textView.text = "I'm ready to start recording data!"
         textView.textSize = 48.0F
 
@@ -104,14 +109,11 @@ class MainActivity : AppCompatActivity() {
         Thread({
             while (threadRun) {
                 val line = reader.readLine()
-                Log.d("Proximity Measurement", line)
+                var postTime = 0L
                 runOnUiThread({
-                    if (line.toFloat() > 300) {
-                        textView.setTextColor(Color.BLUE)
-                    } else {
-                        mNotificationManager.notify(1001, getNotification("Bump", "You're about to bump into something!!").build())
-                        textView.setTextColor(Color.RED)
-                    }
+                    mNotificationManager.cancelAll()
+                    mNotificationManager.notify(1001, getNotification("Bump", "You're about to bump into something!!").build())
+                    textView.setTextColor(Color.RED)
                     textView.text = line
                 })
             }
@@ -122,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         return Notification.Builder(applicationContext, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
+                .setSmallIcon(R.drawable.ic_stat_onesignal_default)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
