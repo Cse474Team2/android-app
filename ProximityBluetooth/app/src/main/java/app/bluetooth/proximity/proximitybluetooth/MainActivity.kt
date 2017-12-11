@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         textView.text = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC).toString()
         mNotificationManager.notify(1001, getNotification("Bump", "Welcome to the bump app!").build())
-        textView.setTextSize(48.0F)
+        textView.textSize = 48.0F
         textView.text = "I'm ready to start recording data!"
         textView.textSize = 48.0F
 
@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
             findBluetoothDevice()
             openBluetoothConnection()
             listenBluetoothConnection()
+            reconnect.text = "Connected"
         } catch (e: Exception) {
             Log.e("ERROR", e.message)
             e.printStackTrace()
