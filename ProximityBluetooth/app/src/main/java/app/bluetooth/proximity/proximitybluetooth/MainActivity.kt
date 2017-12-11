@@ -50,12 +50,14 @@ class MainActivity : AppCompatActivity() {
         mNotificationManager.createNotificationChannel(mChannel)
 
         textView.text = "I'm ready to start recording data!"
-        textView.setTextSize(48.0F)
+        textView.textSize = 48.0F
+
+        reconnect.setOnClickListener {
+            connectBluetooth()
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    fun connectBluetooth() {
         try {
             findBluetoothDevice()
             openBluetoothConnection()
@@ -64,6 +66,11 @@ class MainActivity : AppCompatActivity() {
             Log.e("ERROR", e.message)
             e.printStackTrace()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        connectBluetooth()
     }
 
     private fun findBluetoothDevice() {
